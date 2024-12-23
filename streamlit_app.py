@@ -196,7 +196,7 @@ with st.expander("Обучения модели на своих данных"):
     # Основной функционал
     if __name__ == "__main__":
         # Загрузка ZIP архива
-        uploaded_file = st.file_uploader("Загрузите ZIP-архив с данными", type=["zip"])
+        uploaded_file = st.file_uploader("ZIP-архив с папками, отсортированными по классам.", type=["zip"])
     
         if uploaded_file is not None:
             # Создание временной папки для распаковки архива
