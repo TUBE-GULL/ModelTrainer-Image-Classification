@@ -31,7 +31,7 @@
 <h2 align="center">Instructions</h2>
 
 ```bash
-"/start" - streamlit run app.py 
+"/start" - streamlit run streamlit_app.py 
 ```
 
 ## Installation dependencies
