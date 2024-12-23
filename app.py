@@ -11,13 +11,14 @@ from PIL import Image
 # Для предсказания
 path_model = 'models/'
 
-db_model = {
-    'BaseModel': ((300, 300), ['glioma', 'meningioma', 'notumor', 'pituitary']),
-}
+if "db_model" not in st.session_state:
+    st.session_state.db_model = {
+        'BaseModel': ((300, 300), ['glioma', 'meningioma', 'notumor', 'pituitary']),
+    }
 
 # Заголовок страницы
-st.title("Model Classification of Brain Tumors")
-model_name = st.selectbox('Выберите модель для предсказания:', list(db_model.keys()))
+st.title("Mодель для классификации на изображении !")
+model_name = st.selectbox('Выберите модель для предсказания:', list(st.session_state.db_model.keys()))
 uploaded_file = st.file_uploader("Загрузите изображение", type=["png", "jpg", "jpeg"])
 
 
@@ -37,7 +38,7 @@ if uploaded_file is not None:
                     uploaded_image = uploaded_image.convert('RGB')
 
             # Изменяем размер изображения под модель
-            img_resized = uploaded_image.resize(db_model[model_name][0])
+            img_resized = uploaded_image.resize(st.session_state.db_model[model_name][0])
             # Преобразуем картинку в тензор
             img_array_SB = keras.utils.img_to_array(img_resized)
             img_array_SB = keras.ops.expand_dims(img_array_SB, 0) # Создание дополнительного измерения для батча
@@ -49,12 +50,12 @@ if uploaded_file is not None:
 
             # Получаем метку и вероятность класса с максимальной вероятностью
             predicted_class_index = np.argmax(predictions, axis=1)[0]
-            predicted_class = db_model[model_name][1][predicted_class_index]
+            predicted_class = st.session_state.db_model[model_name][1][predicted_class_index]
             probability = np.max(predictions) * 100
 
             # Выводим результат
             st.success("Модель успешно завершила предсказание!")
-            st.write(f"Предсказанный диагноз: {predicted_class}")
+            st.write(f"Предсказание: {predicted_class}")
             st.write(f"Вероятность: {probability:.2f}%")
 
     # Вызываем функцию предсказания
@@ -62,7 +63,7 @@ if uploaded_file is not None:
 else:
     st.info("Пожалуйста, загрузите изображение для предсказания.")
 
-
+st.title("Вы также можете обучить свою модель")
 
 # код для обучения модели !
 with st.expander("Обучения модели на своих данных"):
@@ -173,11 +174,11 @@ with st.expander("Обучения модели на своих данных"):
         st.write(f"Угол вращения: {rotation_angle} градусов")
         
         zoom = st.slider('Зум:', min_value=0.0, max_value=1.0, value=0.1, step=0.01)
-        brightness = st.slider('Яркость:', min_value=0.0, max_value=2.0, value=1.2, step=0.01)
+        brightness = st.slider('Яркость:', min_value=0.0, max_value=1.0, value=0.2, step=0.01)
         horizontal_shift = st.slider('диапазон сдвига по горизонтали:', min_value=0.0, max_value=1.0, value=0.1, step=0.01)
         vertical_shift = st.slider('диапазон сдвига по вертикали:', min_value=0.0, max_value=1.0, value=0.1, step=0.01)
         flip = st.checkbox('Отражение изображения', value=False)
-        contrast = st.slider('Контрастность:', min_value=0.0, max_value=2.0, value=1.1, step=0.01)
+        contrast = st.slider('Контрастность:', min_value=0.0, max_value=1.0, value=0.1, step=0.01)
         
         img_augmentation = [rotation, zoom, brightness, horizontal_shift, vertical_shift, flip, contrast]
     else:
@@ -248,38 +249,42 @@ with st.expander("Обучения модели на своих данных"):
                         'img_augmentation': img_augmentation,
                     }
 
-                    
                     # Инициализация модели
                     new_model = ModelInterface(settings['IMAGE_SIZE'], settings['CLASS_COUNT'], settings['BATCH_SIZE'], validation_split=settings["validation_split"])
     
                     # Разморозка слоев модели
                     if activate_unfreeze_model:
                         new_model.unfreeze_model(trainable_layers=unfreeze_model)
-    
                     # Подготовка данных и обучение
-                    train_ds, test_ds, control_ds, report = new_model.prepare_data(temp_dir, img_augmentation=settings["img_augmentation"])
-                    print('date ok!')
-                    history = new_model.train_model(train_ds, test_ds, epochs=settings["epochs"])
-                    result = new_model.evaluate_model(control_ds)
-    
-                    # Сохранение модели
-                    path_model = './models/'
-                    if not os.path.exists(path_model):
-                        os.makedirs(path_model)
-                    save_path = os.path.join(path_model, f"{settings['name_model']}.keras")
-                    save_model(new_model, save_path)
-    
-                    # Вывод результатов
+                    with st.spinner('Подготовка данных и обучение...'):
+                        # Подготовка данных и обучение
+                        train_ds, test_ds, control_ds, report = new_model.prepare_data(temp_dir, img_augmentation=settings["img_augmentation"])
+                        # Прогресс-бар для обучения
+                        progress_bar = st.progress(0)  # Начальный прогресс
+                        
+                        history = new_model.train_model(train_ds, test_ds, epochs=settings["epochs"])
+                    
                     st.success("Обучение завершено!")
-                    st.write(f"Точность: {result[0]:.2f}, Потери: {result[1]:.2f}")
-    
+                    st.info(f"Точность: {history.history['accuracy'][-1]:.2f}, Потери: {history.history['loss'][-1]:.2f}")
+                    
+                    
+                    result = new_model.evaluate_model(control_ds)
+                                        
+                    save_path = f"./{path_model}{settings['name_model']}.keras"                   
+                    save_model(new_model.model, save_path)
+
+                    st.success("результат на тестовой данных !")
+                    st.info(f"Точность: {result[0]:.2f}, Потери: {result[1]:.2f}")
+                    st.session_state.db_model[settings['name_model']] = (report['IMAGE_SIZE'], report['CLASS_LIST'])
+                    st.info("Можно преверить модель в списке моделей сверху.")
+
                 except Exception as e:
                     st.error(f"Произошла ошибка: {e}")
     
                 # Удаление временной папки
                 if os.path.exists(temp_dir):
                     shutil.rmtree(temp_dir, ignore_errors=True)
-                    st.info("Временные данные удалены.")
-    
-    
-    
+                    st.write("Временные данные удалены.")
+
+                st.rerun()
+            
