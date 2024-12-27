@@ -1,4 +1,4 @@
-<h1 align="center">telegram-BOT-LSTM-Insight</h1>
+<h1 align="center">ModelTrainer-Image-Classification</h1>
 
 <h2 align="center">Used Libraries</h2>
 <div align="center">
