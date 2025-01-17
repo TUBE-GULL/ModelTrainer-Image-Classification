@@ -38,7 +38,7 @@
 
 You can install the required dependencies either manually or using the `requirements.txt` file.
 
-### Option 2: Install Manually
+###  Install Manually
 ```bash
 pip install tensorflow
 pip install numpy
@@ -47,7 +47,7 @@ pip install streamlit
 
 ````
 
-### Option 1: Install using the `requirements.txt` file
+### Install using the `requirements.txt` file
 ```bash
 pip install -r requirements.txt
 
