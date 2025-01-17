@@ -10,7 +10,7 @@
    <img src="https://github.com/devicons/devicon/blob/master/icons/numpy/numpy-original-wordmark.svg" title="Numpy" alt="Numpy" width="60" height="60"/> 
  </a>
 
- <a href="https://www.tensorflow.org/" target="_blank" rel="noreferrer" style="display: inline-block;">
+ <a href="https://www.tensorflow.org/" target="_blank" rel="noreferrer" style="display: inline-block;"> 
    <img src="https://github.com/devicons/devicon/blob/master/icons/tensorflow/tensorflow-original.svg" title="tensorflow" alt="tensorflow" width="60" height="60"> 
  </a>
 
@@ -34,15 +34,29 @@
 "/start" - streamlit run streamlit_app.py 
 ```
 
-## Installation dependencies
+## Installation of Dependencies
 
-````bash
+You can install the required dependencies either manually or using the `requirements.txt` file.
+
+### Option 1: Install Manually
+```bash
 pip install tensorflow
 pip install numpy
 pip install pandas
 pip install streamlit
 
 ````
+
+### Option 1: Install using the `requirements.txt` file
+```bash
+pip install -r requirements.txt
+
+````
+
+
+
+
+
 
 
 ## Описание программы
