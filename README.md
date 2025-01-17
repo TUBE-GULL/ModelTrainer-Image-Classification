@@ -38,7 +38,7 @@
 
 You can install the required dependencies either manually or using the `requirements.txt` file.
 
-### Option 1: Install Manually
+### Option 2: Install Manually
 ```bash
 pip install tensorflow
 pip install numpy
